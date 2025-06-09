@@ -1,0 +1,102 @@
+<% layout('layouts/boilerplate')%>
+
+<div class="my-4 text-center">
+    <h5 id="progressText">Solved: 0 / 0 (0%)</h5>
+    <div class="progress mx-auto" style="height: 25px; max-width: 400px;">
+      <div 
+        class="progress-bar progress-bar-striped progress-bar-animated bg-success" 
+        id="progressBar" 
+        role="progressbar" 
+        style="width: 0%;" 
+        aria-valuenow="0" 
+        aria-valuemin="0" 
+        aria-valuemax="100"
+      ></div>
+    </div>
+  </div>
+  
+
+
+<div class="container">
+    <div class="row row-cols-1 row-cols-md-3 g-4 mt-4">
+        <% question.forEach(question => { %>
+            <div class="col">
+                <div class="card">
+                    <div class="card-body text-center">
+                        <!-- <div class="form-check">
+                            <input class="form-check-input" type="checkbox" value="" id="checkChecked" unchecked onclick="tracking()">
+                            <label class="form-check-label" for="checkChecked">
+                              Completed
+                            </label>
+                          </div> -->
+                          <div class="form-check">
+                            <input 
+                              class="form-check-input track-checkbox" 
+                              type="checkbox" 
+                              id="check-<%= question._id %>" 
+                              data-id="<%= question._id %>" 
+                              onclick="tracking(this)">
+                              
+                            <label class="form-check-label" for="check-<%= question._id %>">
+                              Completed
+                            </label>
+                          </div>
+                          
+                        <h5 class="card-title"><%= question.title %></h5>
+                        <p class="card-text"><%= question.description %></p>
+                       <form action="/update" method="POST" id="formi">
+                        <input type="hidden" id="track" name="upd">
+                       </form>
+                        <a href="/dsa/<%=question.category %>/<%=question._id %>" class="btn btn-primary">View Question</a>
+                    </div>
+                </div>
+            </div>
+        <% }); %>
+    </div>
+</div>
+
+
+<script>
+    function updateProgress() {
+      const checkboxes = document.querySelectorAll('.track-checkbox');
+      const total = checkboxes.length;
+      let solved = 0;
+  
+      checkboxes.forEach(cb => {
+        const id = cb.dataset.id;
+        const stored = localStorage.getItem(`solved-${id}`);
+        if (stored === 'true') {
+          cb.checked = true;
+          solved++;
+        }
+      });
+      
+      const percent = total > 0 ? Math.floor((solved / total) * 100) : 0;
+  
+      // Update text and progress bar
+      document.getElementById('progressText').textContent = `Solved: ${solved} / ${total} (${percent}%)`;
+      const bar = document.getElementById('progressBar');
+      bar.style.width = `${percent}%`;
+      bar.setAttribute('aria-valuenow', percent);
+      document.getElementById('progressText').style.color='white'
+      // Also update localStorage count (if needed elsewhere)
+      localStorage.setItem('catq', solved);
+    }
+  
+    // Restore on load
+    window.addEventListener('DOMContentLoaded', () => {
+      updateProgress();
+    });
+  
+    // Called on checkbox click
+    function tracking(checkbox) {
+      const id = checkbox.dataset.id;
+      localStorage.setItem(`solved-${id}`, checkbox.checked ? 'true' : 'false');
+      updateProgress(); // update bar + count
+    }
+  </script>
+  
+
+
+
+

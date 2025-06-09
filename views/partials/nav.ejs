@@ -1,0 +1,31 @@
+<nav class="navbar sticky-top navbar-expand-lg navbar-dark bg-dark" >
+    <div class="container-fluid" >
+        <a class="navbar-brand" href="#">Algozen</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavAltMarkup"
+            aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
+            <div class="navbar-nav" style="left: 100px;">
+                <a class="nav-link" href="/">Home</a>
+                <a class="nav-link" href="/dsa">Dsa</a>
+                
+               
+            </div>
+            
+           
+            <div class="navbar-nav ml-auto">
+                <% if(!currentUser){ %>
+                <a class="nav-link" href="/login">Login</a>
+                <a class="nav-link" href="/register">Register</a>
+                <%} else{%>
+                    <a class="nav-link d-flex align-items-center" href="/profile">
+                        <i class="fas fa-user me-2" style="font-size: 1.2rem;"></i>
+                        <span><%= currentUser.username %></span>
+                      </a>
+                <a class="nav-link" href="/logout">Logout</a>
+                <% } %>
+            </div>
+        </div>
+    </div>
+</nav>
