@@ -1,0 +1,9 @@
+<% if (typeof didYouKnow !== 'undefined' && didYouKnow) { %>
+    <div class="container-xl mt-3">
+        <div class="didyouknow" role="status">
+            <div class="didyouknow-kicker">Did you know?</div>
+            <strong><%= didYouKnow.title %></strong>
+            <p><%= didYouKnow.body %></p>
+        </div>
+    </div>
+<% } %>

@@ -1,0 +1,84 @@
+<% layout('layouts/boilerplate') %>
+<% const pct = stats.totalQuestions ? Math.round((stats.solvedCount / stats.totalQuestions) * 100) : 0; %>
+<% const initials = (currentUser.username || 'U').slice(0, 2).toUpperCase(); %>
+
+<div class="profile-hero">
+    <div class="profile-avatar"><%= initials %></div>
+    <div>
+        <p class="page-kicker">Dashboard</p>
+        <h1 class="page-title mb-1"><%= currentUser.username %></h1>
+        <p class="page-subtitle mb-0"><%= currentUser.email %></p>
+    </div>
+    <a href="/dsa" class="btn btn-accent ms-md-auto">Continue practice</a>
+</div>
+
+<div class="stat-row mb-4">
+    <div class="stat-card stat-solved">
+        <span class="stat-label">Questions solved</span>
+        <strong><%= stats.solvedCount %><span class="stat-over"> / <%= stats.totalQuestions %></span></strong>
+        <span class="stat-hint"><%= pct %>% complete</span>
+    </div>
+    <div class="stat-card stat-progress">
+        <span class="stat-label">In progress</span>
+        <strong><%= stats.inProgress %></strong>
+        <span class="stat-hint">Keep going on these</span>
+    </div>
+    <div class="stat-card tone-brute-card">
+        <span class="stat-label">Brute force</span>
+        <strong><%= stats.brute %></strong>
+        <span class="stat-hint">Approaches unlocked</span>
+    </div>
+    <div class="stat-card tone-better-card">
+        <span class="stat-label">Better</span>
+        <strong><%= stats.better %></strong>
+        <span class="stat-hint">Approaches unlocked</span>
+    </div>
+    <div class="stat-card tone-opt-card">
+        <span class="stat-label">Optimized</span>
+        <strong><%= stats.optimized %></strong>
+        <span class="stat-hint">Approaches unlocked</span>
+    </div>
+</div>
+
+<div class="row g-4">
+    <div class="col-lg-7">
+        <div class="az-card az-card-static p-4 h-100">
+            <h2 class="h5 mb-3">Topic progress</h2>
+            <% stats.categories.forEach(cat => { %>
+                <a href="/dsa/<%= cat.slug %>" class="topic-line">
+                    <div class="topic-line-head">
+                        <span><i class="<%= cat.icon %> me-2"></i><%= cat.name %></span>
+                        <span><%= cat.solved %> / <%= cat.count %></span>
+                    </div>
+                    <div class="topic-bar">
+                        <span style="width: <%= cat.count ? Math.round((cat.solved / cat.count) * 100) : 0 %>%"></span>
+                    </div>
+                </a>
+            <% }) %>
+        </div>
+    </div>
+    <div class="col-lg-5">
+        <div class="az-card az-card-static p-4 h-100">
+            <h2 class="h5 mb-3">Recent work</h2>
+            <% if (!stats.recent.length) { %>
+                <p class="page-subtitle mb-0">No submissions yet. Open a topic and start with brute force.</p>
+            <% } else { %>
+                <div class="recent-list">
+                    <% stats.recent.forEach(item => { %>
+                        <a href="/dsa/<%= item.category %>/<%= item.id %>" class="recent-item">
+                            <div>
+                                <strong><%= item.title %></strong>
+                                <div class="approach-mini mt-1">
+                                    <span class="approach-pill pill-brute <%= item.progress.brute ? 'on' : '' %>">Brute</span>
+                                    <span class="approach-pill pill-better <%= item.progress.better ? 'on' : '' %>">Better</span>
+                                    <span class="approach-pill pill-opt <%= item.progress.optimized ? 'on' : '' %>">Optimized</span>
+                                </div>
+                            </div>
+                            <span class="recent-meta"><%= item.progress.complete ? 'Solved' : (item.progress.doneCount + '/3') %></span>
+                        </a>
+                    <% }) %>
+                </div>
+            <% } %>
+        </div>
+    </div>
+</div>

@@ -1,101 +1,52 @@
-<% layout('layouts/boilerplate')%>
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DSA Categories</title>
-    <!-- <link rel="stylesheet" href="/public/styles.css"> -->
-</head>
-<body>
-    <div class="container">
-        <!-- <h1 class="text-center mt-5">DSA Categories</h1>
-     -->
-        <div class="row row-cols-1 row-cols-md-3 g-4 mt-4">
-            <!-- Arrays -->
-            <div class="col" >
-                <div class="card">
-                    <a href="/dsa/arrays" class="text-decoration-none">
-                        <div class="card-body text-center">
-                            <h5 class="card-title">Arrays</h5>
-                            <p class="card-text">Data structure for storing elements in a contiguous memory block.</p>
-                        </div>
-                    </a>
-                </div>
-            </div>
-    
-            <!-- Linked List -->
-            <div class="col">
-                <div class="card">
-                    <a href="/dsa/linked-list" class="text-decoration-none">
-                        <div class="card-body text-center">
-                            <h5 class="card-title">Linked List</h5>
-                            <p class="card-text">Linear data structure where elements are connected using pointers.</p>
-                        </div>
-                    </a>
-                </div>
-            </div>
-    
-            <!-- Searching -->
-            <div class="col">
-                <div class="card">
-                    <a href="/dsa/searching" class="text-decoration-none">
-                        <div class="card-body text-center">
-                            <h5 class="card-title">Searching</h5>
-                            <p class="card-text">Algorithms to find an element within a data structure.</p>
-                        </div>
-                    </a>
-                </div>
-            </div>
-    
-            <!-- Sorting -->
-            <div class="col">
-                <div class="card">
-                    <a href="/dsa/sorting" class="text-decoration-none">
-                        <div class="card-body text-center">
-                            <h5 class="card-title">Sorting</h5>
-                            <p class="card-text">Algorithms to arrange elements in a specific order.</p>
-                        </div>
-                    </a>
-                </div>
-            </div>
-    
-            <!-- Dynamic Programming -->
-            <div class="col">
-                <div class="card">
-                    <a href="/dsa/dynamic-programming" class="text-decoration-none">
-                        <div class="card-body text-center">
-                            <h5 class="card-title">Dynamic Programming</h5>
-                            <p class="card-text">Optimization technique to solve problems by breaking them into subproblems.</p>
-                        </div>
-                    </a>
-                </div>
-            </div>
-    
-            <!-- Graphs -->
-            <div class="col">
-                <div class="card">
-                    <a href="/dsa/graphs" class="text-decoration-none">
-                        <div class="card-body text-center">
-                            <h5 class="card-title">Graphs</h5>
-                            <p class="card-text">Non-linear data structure used to represent connections.</p>
-                        </div>
-                    </a>
-                </div>
-            </div>
-    
-            <!-- Other -->
-            <div class="col">
-                <div class="card">
-                    <a href="/dsa/other" class="text-decoration-none">
-                        <div class="card-body text-center">
-                            <h5 class="card-title">Other</h5>
-                            <p class="card-text">Miscellaneous DSA topics that don’t fit into specific categories.</p>
-                        </div>
-                    </a>
-                </div>
-            </div>
-        </div>
+<% layout('layouts/boilerplate') %>
+
+<div class="page-head">
+    <div>
+        <p class="page-kicker">Practice</p>
+        <h1 class="page-title">Choose a topic</h1>
+        <p class="page-subtitle">Finish brute force, better, then optimized. A question counts as solved only after all three are confirmed.</p>
     </div>
-    
-   
+</div>
+
+<div class="stat-row mb-4">
+    <div class="stat-card stat-solved">
+        <span class="stat-label">Questions solved</span>
+        <strong><%= solvedCount %><span class="stat-over"> / <%= totalQuestions %></span></strong>
+        <span class="stat-hint">All 3 approaches complete</span>
+    </div>
+    <div class="stat-card stat-progress">
+        <span class="stat-label">In progress</span>
+        <strong><%= inProgress %></strong>
+        <span class="stat-hint">Started, not fully solved</span>
+    </div>
+    <div class="stat-card stat-left">
+        <span class="stat-label">Remaining</span>
+        <strong><%= Math.max(totalQuestions - solvedCount, 0) %></strong>
+        <span class="stat-hint">Still to complete</span>
+    </div>
+</div>
+
+<div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+    <% categories.forEach((cat, i) => { %>
+        <div class="col">
+            <a href="/dsa/<%= cat.slug %>" class="az-card-link">
+                <div class="az-card topic-card tone-<%= i % 7 %>">
+                    <div class="card-body">
+                        <div class="az-icon"><i class="<%= cat.icon %>"></i></div>
+                        <h5 class="card-title"><%= cat.name %></h5>
+                        <p class="card-text"><%= cat.blurb %></p>
+                        <div class="topic-progress">
+                            <div class="topic-progress-top">
+                                <span><%= cat.solved %> / <%= cat.count %> solved</span>
+                                <span><%= cat.count ? Math.round((cat.solved / cat.count) * 100) : 0 %>%</span>
+                            </div>
+                            <div class="topic-bar">
+                                <span style="width: <%= cat.count ? Math.round((cat.solved / cat.count) * 100) : 0 %>%"></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </a>
+        </div>
+    <% }) %>
+</div>

@@ -1,29 +1,31 @@
-<nav class="navbar sticky-top navbar-expand-lg navbar-dark bg-dark" >
-    <div class="container-fluid" >
-        <a class="navbar-brand" href="#">Algozen</a>
-        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavAltMarkup"
+<nav class="navbar sticky-top navbar-expand-lg navbar-dark app-nav">
+    <div class="container-xl">
+        <a class="navbar-brand" href="/">
+            <span class="brand-mark">A</span>
+            Algozens
+        </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavAltMarkup"
             aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
         </button>
         <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
-            <div class="navbar-nav" style="left: 100px;">
+            <div class="navbar-nav me-auto">
                 <a class="nav-link" href="/">Home</a>
-                <a class="nav-link" href="/dsa">Dsa</a>
-                
-               
+                <a class="nav-link" href="/dsa">Practice</a>
+                <% if (currentUser) { %>
+                    <a class="nav-link" href="/profile">Dashboard</a>
+                <% } %>
             </div>
-            
-           
-            <div class="navbar-nav ml-auto">
-                <% if(!currentUser){ %>
-                <a class="nav-link" href="/login">Login</a>
-                <a class="nav-link" href="/register">Register</a>
-                <%} else{%>
-                    <a class="nav-link d-flex align-items-center" href="/profile">
-                        <i class="fas fa-user me-2" style="font-size: 1.2rem;"></i>
-                        <span><%= currentUser.username %></span>
-                      </a>
-                <a class="nav-link" href="/logout">Logout</a>
+            <div class="navbar-nav align-items-lg-center">
+                <% if (!currentUser) { %>
+                    <a class="nav-link" href="/login">Login</a>
+                    <a class="nav-link" href="/register">Register</a>
+                <% } else { %>
+                    <a class="nav-link profile-nav" href="/profile">
+                        <span class="nav-avatar"><%= currentUser.username.slice(0, 1).toUpperCase() %></span>
+                        <%= currentUser.username %>
+                    </a>
+                    <a class="nav-link" href="/logout">Logout</a>
                 <% } %>
             </div>
         </div>

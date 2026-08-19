@@ -1,151 +1,218 @@
-<div class="p-4" style="background-color: #0f0f0f; color: #f1f1f1; min-height: 100vh;">
-  <!-- Question Card -->
-    <!-- <a href="/dsa/<%= question.category%>">back</a> -->
-    <button onclick="window.location.href='/dsa/<%= question.category %>'" class="btn btn-outline-light mb-3">
-      ← Back
-    </button>
-    
+<% layout('layouts/boilerplate') %>
+<% const categoryLabel = question.category.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' '); %>
+<% const classified = typeof classifiedApproach !== 'undefined' ? classifiedApproach : null; %>
 
-  <div class="mb-4" style="background-color: #1a1a1a; border: 1px solid #333; padding: 2rem; border-radius: 10px;">
-    <h2 class="mb-3" style="color: #ffffff;"><%= question.title %></h2>
-    <p class="text-muted mb-3"><%= question.description %></p>
-
-    <h5 style="color: #ccc;">Input Format:</h5>
-    <pre style="background-color: #2a2a2a; padding: 1rem; border-radius: 5px;"><%= question.inputFormat %></pre>
-
-    <h5 class="mt-4" style="color: #ccc;">Output Format:</h5>
-    <pre style="background-color: #2a2a2a; padding: 1rem; border-radius: 5px;"><%= question.outputFormat %></pre>
-
-    <h5 class="mt-4" style="color: #ccc;">Test Cases:</h5>
-    <% if (question.testCases && Array.isArray(question.testCases)) { %>
-      <% question.testCases.forEach(testCase => { %>
-        <div style="background-color: #2a2a2a; padding: 1rem; border-radius: 5px; margin-bottom: 10px;">
-          <p><strong style="color: #88c0d0;">Input:</strong> <%= testCase.input %></p>
-          <p><strong style="color: #a3be8c;">Expected Output:</strong> <%= testCase.expectedOutput %></p>
+<div class="workspace">
+    <div class="workspace-top">
+        <a href="/dsa/<%= question.category %>" class="btn btn-ghost btn-sm">← <%= categoryLabel %></a>
+        <h1 class="workspace-title"><%= question.title %></h1>
+        <div class="approach-track workspace-track">
+            <% ['brute', 'better', 'optimized'].forEach(key => { %>
+                <% const isDone = progress[key] || classified === key; %>
+                <% if (isDone) { %>
+                    <button type="button" class="approach-step step-<%= key %> done <%= classified === key ? 'just-marked' : '' %>" data-approach="<%= key %>" onclick="loadApproach('<%= key %>')">
+                        ✓ <%= approachLabels[key] %>
+                    </button>
+                <% } else { %>
+                    <div class="approach-step step-<%= key %> <%= !classified && progress.next === key ? 'current' : '' %>">
+                        <%= !classified && progress.next === key ? '→ ' : '' %><%= approachLabels[key] %>
+                    </div>
+                <% } %>
+            <% }) %>
         </div>
-      <% }) %>
-    <% } else { %>
-      <p style="color: #f39c12;">No test cases available for this question.</p>
-    <% } %>
-  </div>
+    </div>
 
-  <!-- AI Response -->
-  <div class="mb-4 w-100" style="background-color: #1a1a1a; border: 1px solid #333; padding: 2rem; border-radius: 10px;">
-    <h4 style="color: #ffffff;">AI Response</h4>
-    <textarea 
-      id="aiResponse"
-      class="form-control w-100"
-      rows="8"
-      style="background-color: #2d2d2d; color: #e0e0e0; border: none; margin-top: 1rem; resize: vertical; min-height: 150px; width: 100%;"
-      readonly
-    ><%= result && result.response ? result.response.text() : "AI response will appear here..." %></textarea>
-  </div>
+    <div class="workspace-grid">
+        <aside class="problem-panel">
+            <p class="page-kicker"><%= categoryLabel %></p>
+            <h2 class="h4 mb-3"><%= question.title %></h2>
+            <p class="problem-desc"><%= question.description %></p>
 
-  <!-- Code Editor -->
-  <div class="mb-4" style="background-color: #1a1a1a; border: 1px solid #333; padding: 2rem; border-radius: 10px;">
-    <h4 style="color: #ffffff;">Your Solution</h4>
-    <div id="editor" style="height: 300px; border: 1px solid #444; background-color: #222; border-radius: 5px; margin-top: 1rem;"></div>
-  </div>
+            <h5 class="section-label">Input format</h5>
+            <pre class="format-block"><%= question.inputFormat %></pre>
 
-  <!-- Submit & Run Buttons -->
-  <!-- <div class="text-center d-flex justify-content-center gap-3 mt-3 flex-wrap">
-    <form action="/dsa/<%= question.category %>/<%= question._id %>" method="POST" id="codeForm" class="d-inline">
-      <input type="hidden" name="code" id="code">
-      <button type="submit" class="btn btn-primary px-4 py-2" style="font-size: 1.1rem;">Hint</button>
-    </form>
+            <h5 class="section-label">Output format</h5>
+            <pre class="format-block"><%= question.outputFormat %></pre>
 
-    <button type="button" class="btn btn-success px-4 py-2" onclick="runCode()" style="font-size: 1.1rem;">Run Code</button>
-  </div>
-</div> -->
-<div class="d-flex justify-content-start gap-3 mt-3">
-  <!-- Form for Hint button -->
-  <form action="/dsa/<%= question.category %>/<%= question._id %>" method="POST" id="codeForm" class="d-inline-block">
-    <input type="hidden" name="code" id="code">
-    <button type="submit" class="btn btn-dark text-white px-4 py-2" style="font-size: 1.1rem;">Hint</button>
-  </form>
+            <h5 class="section-label">Test cases</h5>
+            <% if (question.testCases && question.testCases.length) { %>
+                <% question.testCases.forEach((testCase, i) => { %>
+                    <div class="case-block">
+                        <div class="mb-1"><span class="az-chip">Case <%= i + 1 %></span></div>
+                        <p class="mb-1"><strong class="case-label-in">Input</strong></p>
+                        <pre class="mb-2"><%= testCase.input %></pre>
+                        <p class="mb-1"><strong class="case-label-out">Expected</strong></p>
+                        <pre class="mb-0"><%= testCase.expectedOutput %></pre>
+                    </div>
+                <% }) %>
+            <% } else { %>
+                <p class="page-subtitle">No test cases yet.</p>
+            <% } %>
+        </aside>
 
-  <!-- Run Code button -->
-  <button type="button" class="btn btn-dark text-white px-4 py-2" onclick="runCode()" style="font-size: 1.1rem;">Run Code</button>
+        <section class="code-col">
+            <div class="editor-panel">
+                <div class="editor-head">
+                    <div>
+                        <h4 class="mb-1">Editor</h4>
+                        <p id="viewingNote" class="approach-next mb-0"></p>
+                    </div>
+                    <div class="d-flex gap-2 flex-wrap">
+                        <form action="/dsa/<%= question.category %>/<%= question._id %>" method="POST" id="codeForm">
+                            <input type="hidden" name="code" id="code">
+                            <button type="submit" class="btn btn-accent">Check approach</button>
+                        </form>
+                        <button type="button" class="btn btn-dark-soft" onclick="runCode()">Run</button>
+                    </div>
+                </div>
+                <div id="editor"></div>
+                <pre id="outputArea">Run your code to see output here.</pre>
+            </div>
+
+            <div class="hint-panel coach-card">
+                <div class="coach-head">
+                    <h4 class="mb-0">Coach</h4>
+                    <% if (classified) { %>
+                        <span class="approach-pill pill-<%= classified === 'optimized' ? 'opt' : classified %> on"><%= approachLabels[classified] %></span>
+                    <% } %>
+                </div>
+                <p class="coach-message"><%= hintText || 'Write a solution, then click Check approach. We will fix errors first, then lock brute → better → optimized.' %></p>
+            </div>
+
+            <% const quizState = typeof quiz !== 'undefined' ? quiz : null; %>
+            <% const quizOutcome = typeof quizResult !== 'undefined' ? quizResult : null; %>
+            <% if (quizOutcome) { %>
+                <div class="quiz-card <%= quizOutcome.correct ? 'quiz-ok' : 'quiz-miss' %>">
+                    <div class="coach-head">
+                        <h4 class="mb-0"><%= quizOutcome.correct ? 'Complexity accepted' : 'Check that Big-O again' %></h4>
+                        <span class="approach-pill <%= quizOutcome.correct ? 'pill-opt on' : '' %>"><%= quizOutcome.label %></span>
+                    </div>
+                    <p class="coach-message"><%= quizOutcome.explanation %></p>
+                </div>
+            <% } %>
+            <% if (quizState) { %>
+                <form class="quiz-card" action="/dsa/<%= question.category %>/<%= question._id %>/complexity" method="POST">
+                    <div class="coach-head">
+                        <h4 class="mb-0">Complexity quiz</h4>
+                        <span class="approach-pill pill-<%= quizState.approach === 'optimized' ? 'opt' : quizState.approach %> on"><%= quizState.label %></span>
+                    </div>
+                    <p class="coach-message mb-3"><%= quizState.question %></p>
+                    <input type="hidden" name="approach" value="<%= quizState.approach %>">
+                    <div class="quiz-fields">
+                        <label>
+                            Time
+                            <input type="text" name="time" placeholder="O(n)" value="<%= quizOutcome && quizOutcome.approach === quizState.approach ? quizOutcome.time : '' %>" required>
+                        </label>
+                        <label>
+                            Space
+                            <input type="text" name="space" placeholder="O(1)" value="<%= quizOutcome && quizOutcome.approach === quizState.approach ? quizOutcome.space : '' %>" required>
+                        </label>
+                    </div>
+                    <button type="submit" class="btn btn-accent mt-3">Check complexity</button>
+                </form>
+            <% } %>
+        </section>
+    </div>
 </div>
-<div>
-  <!-- Output -->
-  <pre id="outputArea" style="margin-top: 1rem; background-color: #111; color: #0f0; padding: 1rem; border-radius: 8px;"></pre>
-</div>
 
-<!-- Monaco Editor -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.38.0/min/vs/loader.min.js"></script>
 <script>
-  var editorInstance;
-  const questionId = "<%= question._id %>";
-  const storageKey = `code-${questionId}`;
+    var editorInstance;
+    const questionId = "<%= question._id %>";
+    const storageKey = `code-${questionId}`;
+    const approachCodes = <%- JSON.stringify(typeof approachCodes !== 'undefined' && approachCodes ? approachCodes : { brute: '', better: '', optimized: '' }) %>;
+    const approachLabels = <%- JSON.stringify(approachLabels) %>;
+    const progressState = <%- JSON.stringify({ brute: !!progress.brute, better: !!progress.better, optimized: !!progress.optimized, complete: !!progress.complete, next: progress.next, doneCount: progress.doneCount }) %>;
 
-  require.config({ paths: { 'vs': 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.38.0/min/vs' } });
-  require(["vs/editor/editor.main"], function () {
-    const savedCode = localStorage.getItem(storageKey) || <%- JSON.stringify(storedCode || "// Write your solution here...") %>;
-    console.log(storageKey,savedCode);
-    editorInstance = monaco.editor.create(document.getElementById("editor"), {
-      value: savedCode,
-      language: "javascript",
-      theme: "vs-dark",
-      automaticLayout: true
+    require.config({ paths: { 'vs': 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.38.0/min/vs' } });
+    require(["vs/editor/editor.main"], function () {
+        const params = new URLSearchParams(window.location.search);
+        const requested = params.get('approach');
+        let initial = localStorage.getItem(storageKey) || <%- JSON.stringify(storedCode || "// Write your solution here...") %>;
+        if (requested && progressState[requested] && approachCodes[requested]) {
+            initial = approachCodes[requested];
+        }
+        editorInstance = monaco.editor.create(document.getElementById("editor"), {
+            value: initial,
+            language: "javascript",
+            theme: "vs-dark",
+            automaticLayout: true,
+            minimap: { enabled: false }
+        });
+        if (requested && progressState[requested]) {
+            setViewingNote(requested, true);
+        } else {
+            setViewingNote(null);
+        }
     });
-  });
 
-  document.getElementById("codeForm").addEventListener("submit", function (event) {
-    event.preventDefault();
-    const code = editorInstance.getValue();
-    document.getElementById("code").value = code;
-    localStorage.setItem(storageKey, code);
-    this.submit();
-  });
-</script>
-
-<!-- Run Code using Judge0 -->
-<script>
-  async function runCode() {
-    const sourceCode = btoa(editorInstance.getValue());
-    const input = btoa(`<%= question.testCases && question.testCases[0]?.input || "" %>`);
-    const outputArea = document.getElementById("outputArea");
-    //console.log(sourceCode)
-    outputArea.textContent = "Running...";
-
-    try {
-      const response = await fetch("https://judge0-ce.p.rapidapi.com/submissions?base64_encoded=true&wait=true&fields=*", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "x-rapidapi-key": "260d3697c1msh6a7e5cff2752532p175c7cjsn4bb140c247e6",
-          "x-rapidapi-host": "judge0-ce.p.rapidapi.com"
-        },
-        body: JSON.stringify({
-          language_id: 52,
-          source_code: sourceCode,
-          stdin: input
-        })
-      });
-
-      const result = await response.json();
-
-      const stdout = result.stdout ? atob(result.stdout) : "";
-      const stderr = result.stderr ? atob(result.stderr) : "";
-      const compile_output = result.compile_output ? atob(result.compile_output) : "";
-      const status = result.status?.description || "Unknown";
-
-      outputArea.textContent = `
-Status: ${status}
-
-Output:
-${stdout}
-
-Error:
-${stderr}
-
-Compiler Output:
-${compile_output}
-      `;
-    } catch (error) {
-      outputArea.textContent = "An error occurred while running your code.";
-      console.error(error);
+    function setViewingNote(kind, fromDb) {
+        const el = document.getElementById('viewingNote');
+        document.querySelectorAll('.approach-step.done').forEach(btn => btn.classList.remove('viewing'));
+        if (kind) {
+            const btn = document.querySelector('.approach-step.done[data-approach="' + kind + '"]');
+            if (btn) btn.classList.add('viewing');
+            el.className = 'approach-complete mb-0';
+            el.textContent = (fromDb ? 'Loaded from your account: ' : 'Showing ') + approachLabels[kind];
+            return;
+        }
+        if (progressState.complete) {
+            el.className = 'approach-complete mb-0';
+            el.textContent = 'All three approaches are saved. Click one to reopen it.';
+        } else {
+            el.className = 'approach-next mb-0';
+            el.innerHTML = 'Next: <strong>' + (approachLabels[progressState.next] || '') + '</strong> · ' + progressState.doneCount + '/3';
+        }
     }
-  }
+
+    async function loadApproach(kind) {
+        try {
+            const res = await fetch('/dsa/<%= question.category %>/<%= question._id %>/approach/' + kind);
+            const data = await res.json();
+            if (!res.ok) {
+                setViewingNote(null);
+                return;
+            }
+            if (editorInstance) editorInstance.setValue(data.code || '// No saved code for this approach.');
+            localStorage.setItem(storageKey, data.code || '');
+            setViewingNote(kind, true);
+        } catch (err) {
+            console.error(err);
+        }
+    }
+
+    document.getElementById("codeForm").addEventListener("submit", function (event) {
+        if (!editorInstance) {
+            event.preventDefault();
+            return;
+        }
+        document.getElementById("code").value = editorInstance.getValue();
+        localStorage.setItem(storageKey, editorInstance.getValue());
+    });
+
+    async function runCode() {
+        const sourceCode = btoa(editorInstance.getValue());
+        const input = btoa(`<%= question.testCases && question.testCases[0] ? question.testCases[0].input : "" %>`);
+        const outputArea = document.getElementById("outputArea");
+        outputArea.textContent = "Running...";
+        try {
+            const response = await fetch("https://judge0-ce.p.rapidapi.com/submissions?base64_encoded=true&wait=true&fields=*", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "x-rapidapi-key": "260d3697c1msh6a7e5cff2752532p175c7cjsn4bb140c247e6",
+                    "x-rapidapi-host": "judge0-ce.p.rapidapi.com"
+                },
+                body: JSON.stringify({ language_id: 63, source_code: sourceCode, stdin: input })
+            });
+            const result = await response.json();
+            const stdout = result.stdout ? atob(result.stdout) : "";
+            const stderr = result.stderr ? atob(result.stderr) : "";
+            const compile_output = result.compile_output ? atob(result.compile_output) : "";
+            outputArea.textContent = `Status: ${result.status?.description || "Unknown"}\n\nOutput:\n${stdout}\n\nError:\n${stderr}\n\nCompiler Output:\n${compile_output}`;
+        } catch (error) {
+            outputArea.textContent = "An error occurred while running your code.";
+            console.error(error);
+        }
+    }
 </script>
