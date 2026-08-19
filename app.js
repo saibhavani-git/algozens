@@ -1,3 +1,5 @@
+require('dotenv').config();
+
 const express = require('express');
 const path = require('path');
 const mongoose = require('mongoose');
@@ -13,8 +15,7 @@ const mongoSanitize = require('express-mongo-sanitize');
 const MongoStore = require('connect-mongo');  // Correct import
 const User=require('./models/user')
 
-const DB_URL = 'mongodb://127.0.0.1:27017/dsa-platform'; // Database URL
-// process.env.DB_URL
+const DB_URL = process.env.DB_URL || 'mongodb://127.0.0.1:27017/dsa-platform';
 mongoose.connect(DB_URL);
 mongoose.set('strictPopulate', false);
 
@@ -536,6 +537,11 @@ app.post('/dsa/:category/:id/complexity', isloggedin, async (req, res) => {
 //   res.status(statusCode).render('error', { err });
 // });
 
-app.listen(3000, () => {
-  console.log('Serving on port 3000');
-});
+module.exports = app;
+
+if (require.main === module) {
+  const port = process.env.PORT || 3000;
+  app.listen(port, () => {
+    console.log(`Serving on port ${port}`);
+  });
+}
