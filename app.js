@@ -15,7 +15,17 @@ const mongoSanitize = require('express-mongo-sanitize');
 const MongoStore = require('connect-mongo');  // Correct import
 const User=require('./models/user')
 
-const DB_URL = process.env.DB_URL || 'mongodb://127.0.0.1:27017/dsa-platform';
+const DB_URL =
+  process.env.DB_URL ||
+  process.env.MONGODB_URI ||
+  (process.env.VERCEL ? null : 'mongodb://127.0.0.1:27017/dsa-platform');
+
+if (!DB_URL) {
+  throw new Error(
+    'Missing DB_URL. Add your MongoDB Atlas connection string in Vercel → Settings → Environment Variables, then redeploy.'
+  );
+}
+
 mongoose.connect(DB_URL);
 mongoose.set('strictPopulate', false);
 
